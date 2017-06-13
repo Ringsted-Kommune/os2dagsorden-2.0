@@ -1246,7 +1246,7 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed'=>TRUE,
-    '#title' => t('Suppress HTML mismatch warnings '),
+    '#title' => t('Suppress HTML mismatch warnings'),
   );
   //meeting view settings
   $form['os2dagsorden_meeting_html_mismatch']['os2dagsorden_meeting_html_mismatch_suppress'] = array(
