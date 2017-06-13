@@ -702,7 +702,14 @@ function _acadre_esdh_mm_improve_body_html($data) {
   $url_strip_count = variable_get('os2dagsorden_url_strip_count','100');
   $data = preg_replace('/(<a.+?>)(.{0,'.$url_strip_count.'})(<\/a>)/is', '$1$2...$3', $data);
   $doc = new DOMDocument();
-  $doc->loadHTML( $data);
+  
+  // If settings is 1 then it means we want to suppress the warnings.
+  if(variable_get('os2dagsorden_meeting_html_mismatch_suppress' == 1)) {
+      @$doc->loadHTML($data);
+  } else {
+     $doc->loadHTML($data); 
+  }
+  
   $elements = $doc->getElementsByTagName('img');
   if($elements->length > 0){
       foreach($elements as $element)  {

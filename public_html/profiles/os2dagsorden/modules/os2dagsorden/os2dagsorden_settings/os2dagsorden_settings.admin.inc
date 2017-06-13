@@ -1240,6 +1240,22 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     '#description' => t('This decides whether a committee short name will used instead of meeting name in the calendar view'),
     '#default_value' => variable_get('os2dagsorden_meeting_view_calendar_short_name',FALSE),
   );
+  
+  // Suppress php warning of html mismatch when doing cron import off mettings.
+  $form['os2dagsorden_meeting_html_mismatch'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed'=>TRUE,
+    '#title' => t('Suppress HTML mismatch warnings '),
+  );
+  //meeting view settings
+  $form['os2dagsorden_meeting_html_mismatch']['os2dagsorden_meeting_html_mismatch_suppress'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Supress loadHTML() warnings'),
+    '#description' => t('Supresses the HTML mismatch warning from DOMDocument::loadHTML(): in acadre.inc - Method: _acadre_esdh_mm_improve_body_html()'),
+    '#default_value' => variable_get('os2dagsorden_meeting_html_mismatch_suppress',FALSE),
+  );
+  
   //sort items alphabetically
   ksort($form);
   return system_settings_form($form);
