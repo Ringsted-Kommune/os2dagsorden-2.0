@@ -164,6 +164,7 @@ function os2web_print_send_to_friend_send_to_friend($meeting_id, $bullet_point_i
 function os2web_print_send_to_friend_mail($key, &$message, $params) {
    $message['subject'] = $params['subject'];
    $message['body'][] = $params['body'];
+   $message['headers']['content-type'] = 'text/html';
    $message['params']['attachments']=  $params['params']['attachments'];
  }
 
