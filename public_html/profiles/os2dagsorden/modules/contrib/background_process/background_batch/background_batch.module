@@ -36,7 +36,7 @@ function background_batch_menu() {
     'description' => 'Administer batch jobs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('background_batch_settings_form'),
-    'access arguments' => array('administer site'),
+    'access arguments' => array('administer site configuration'),
     'file' => 'background_batch.pages.inc',
   );
   $items['admin/config/system/batch/overview'] = array(
@@ -44,7 +44,7 @@ function background_batch_menu() {
     'title' => 'Overview',
     'description' => 'Batch job overview',
     'page callback' => 'background_batch_overview_page',
-    'access arguments' => array('administer site'),
+    'access arguments' => array('administer site configuration'),
     'file' => 'background_batch.pages.inc',
     'weight' => 3,
   );

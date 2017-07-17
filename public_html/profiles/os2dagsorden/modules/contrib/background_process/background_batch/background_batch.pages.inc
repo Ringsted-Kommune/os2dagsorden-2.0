@@ -48,6 +48,16 @@ function background_batch_overview_page() {
 
   foreach ($bids as $bid) {
     $progress = progress_get_progress('_background_batch:' . $bid);
+
+    if (!$progress) {
+      $progress = (object)array(
+        'start' => 0,
+        'end' => 0,
+        'progress' => 0,
+        'message' => t('N/A'),
+      );
+    }
+
     $eta = progress_estimate_completion($progress);
     $data[] = array(
       $progress->end ? $bid : l($bid, 'batch', array('query' => array('op' => 'start', 'id' => $bid))),

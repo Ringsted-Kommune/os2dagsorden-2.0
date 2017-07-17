@@ -90,12 +90,15 @@ class BackgroundProcess {
       return FALSE;
     }
 
-    if (!background_process_set_process($this->handle, $callback, $this->uid, $args, $this->token)) {
+    $this->callback = $callback;
+    $this->args = $args;
+
+    if (!background_process_set_process($this->handle, $this->callback, $this->uid, $this->args, $this->token)) {
       // Could not update process
       return NULL;
     }
 
-    module_invoke_all('background_process_pre_execute', $this->handle, $callback, $args, $this->token);
+    module_invoke_all('background_process_pre_execute', $this->handle, $this->callback, $this->args, $this->token);
 
     // Initialize progress stats
     $old_db = db_set_active('background_process');
@@ -103,7 +106,7 @@ class BackgroundProcess {
     db_set_active($old_db);
 
     $queues = variable_get('background_process_queues', array());
-    $queue_name = isset($queues[$callback]) ? 'bgp:' . $queues[$callback] : 'background_process';
+    $queue_name = isset($queues[$this->callback]) ? 'bgp:' . $queues[$this->callback] : 'background_process';
     $queue = DrupalQueue::get($queue_name);
     $queue->createItem(array(rawurlencode($this->handle), rawurlencode($this->token)));
     _background_process_ensure_cleanup($this->handle, TRUE);
@@ -157,12 +160,14 @@ class BackgroundProcess {
   }
 
   public function execute($callback, $args = array()) {
-    if (!background_process_set_process($this->handle, $callback, $this->uid, $args, $this->token)) {
+    $this->callback = $callback;
+    $this->args = $args;
+    if (!background_process_set_process($this->handle, $this->callback, $this->uid, $this->args, $this->token)) {
       // Could not update process
       return NULL;
     }
 
-    module_invoke_all('background_process_pre_execute', $this->handle, $callback, $args, $this->token);
+    module_invoke_all('background_process_pre_execute', $this->handle, $this->callback, $this->args, $this->token);
 
     // Initialize progress stats
     $old_db = db_set_active('background_process');
@@ -194,7 +199,7 @@ class BackgroundProcess {
     }
     else {
       background_process_remove_process($this->handle);
-      watchdog('bg_process', 'Could not call service %handle for callback %callback: %error', array('%handle' => $this->handle, '%callback' => $callback, '%error' => $result->error), WATCHDOG_ERROR);
+      watchdog('bg_process', 'Could not call service %handle for callback %callback: !error', array('%handle' => $this->handle, '%callback' => _background_process_callback_name($this->callback), '!error' => print_r($result, TRUE)), WATCHDOG_ERROR);
       // Throw exception here instead?
       return NULL;
     }
