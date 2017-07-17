@@ -4,26 +4,27 @@
   display: block;
 }
 
-.ultimate-cron-admin-status-tabs {
-  margin-top: -0.5em !important;
-}
-
 .ultimate-cron-admin-status span {
   display: none;
 }
 
-.ultimate-cron-admin-status-noinfo,
+.ultimate-cron-admin-status-info,
 .ultimate-cron-admin-status-error,
-.ultimate-cron-admin-status-noerror,
+.ultimate-cron-admin-status-success,
+.ultimate-cron-admin-status-warning,
 .ultimate-cron-admin-status-running {
   background-position: center;
   background-repeat: no-repeat;
 }
 
+a.ultimate-cron-admin-status-info,
+a.ultimate-cron-admin-status-info:hover,
 a.ultimate-cron-admin-status-error,
 a.ultimate-cron-admin-status-error:hover,
-a.ultimate-cron-admin-status-noerror,
-a.ultimate-cron-admin-status-noerror:hover,
+a.ultimate-cron-admin-status-success,
+a.ultimate-cron-admin-status-success:hover,
+a.ultimate-cron-admin-status-warning,
+a.ultimate-cron-admin-status-warning:hover,
 a.ultimate-cron-admin-status-running,
 a.ultimate-cron-admin-status-running:hover {
   padding-left: 24px !important;
@@ -32,16 +33,20 @@ a.ultimate-cron-admin-status-running:hover {
 }
 
 
-.ultimate-cron-admin-status-noinfo {
-  background-image: url(../icons/information.png) !important;
+.ultimate-cron-admin-status-info {
+  background-image: url(../icons/message-16-info.png) !important;
 }
 
 .ultimate-cron-admin-status-error {
-  background-image: url(../icons/error.png) !important;
+  background-image: url(../icons/message-16-error.png) !important;
 }
 
-.ultimate-cron-admin-status-noerror {
-  background-image: url(../icons/tick.png) !important;
+.ultimate-cron-admin-status-success {
+  background-image: url(../icons/message-16-ok.png) !important;
+}
+
+.ultimate-cron-admin-status-warning {
+  background-image: url(../icons/message-16-warning.png) !important;
 }
 
 .ultimate-cron-admin-status-running {
