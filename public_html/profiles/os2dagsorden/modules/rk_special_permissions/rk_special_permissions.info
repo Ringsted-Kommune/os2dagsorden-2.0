@@ -1,3 +1,0 @@
-name = RK Special Permissions
-desctiption = This module is made to insure that external logins, cant see other agendas than the one we give them the rights to see throug Active Directory group. 
-core = 7.x 
