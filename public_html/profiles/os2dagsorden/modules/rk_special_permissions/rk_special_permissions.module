@@ -1,0 +1,92 @@
+<?php
+
+// Creating admin menu link to control witch ad groups and user roles that should be checked for. 
+function rk_special_permissions_menu() {
+    $items['admin/config/content/rk_special_permissions'] = array(
+        'title' => 'RK Special permissions',
+        'description' => 'Controller users logged in by nemid.',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('rk_special_permissions_form'),
+        'access arguments' => array('RK special permissions settings'),
+        'type' => MENU_NORMAL_ITEM,
+    );
+   
+    return $items;
+}
+
+function rk_special_permissions_form($form, &$form_state) {
+    
+    // Just setting this empty since we dont have anything the first time the module is enabled. 
+    $storedValues = ""; 
+    
+    if(!empty(variable_get('rk_special_permissions_information'))) {
+        $storedValues = variable_get('rk_special_permissions_information')['rk_special_permissions_information'];
+    }
+    
+    
+    $form['rk_special_permissions_information'] = array(
+        '#type' => 'textarea', 
+        '#title' => t('Access information'), 
+        '#default_value' => $storedValues, 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+        '#required' => TRUE,
+        '#description' => t("SYNTAX -> <b>#[Ad group name]:[udvalg ids comma seperated]</b>. do this foreach adgroup that we should check. "), 
+    );
+    
+    $form['rk_special_permissions_form_submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
+    );
+
+    return $form;   
+}
+    
+    function rk_special_permissions_form_submit($form, &$form_state) {     
+        
+        variable_set('rk_special_permissions_information', $form_state['values']);
+
+        $validationData = array();
+        
+        // Gettting all of the lines and inserting to array
+        $informationRoles = explode("#", variable_get('rk_special_permissions_information')['rk_special_permissions_information']);
+        
+        // Getting ad group names and their values on udvalgs id's
+        foreach ($informationRoles as $role) {
+            $validInformation = explode(":", $role);
+            $validationData[$validInformation[0]] = $validInformation[1];
+        }
+        
+        variable_set('rk_special_permissions_information_validation_data', $validationData);
+        
+        drupal_set_message("Saved!");     
+    }
+
+
+
+
+// Hooking node_access to make sure users of specifik groups in ad only can see what we choose. 
+// We are doing this because these users are not Ringsted Kommune employes, and needs to be controlled in what to read. 
+function rk_special_permissions_node_access($node, $op, $account) {
+    
+    // Getting admin defined user roles and udvalgs id's to make the check on.
+    $validationData = variable_get('rk_special_permissions_information_validation_data');
+    
+    // Getting the "udvalgs id" of the curent node we are looking at. 
+    $assortmentId = taxonomy_term_load($node->field_os2web_meetings_committee['und'][0]['tid'])->field_os2web_meetings_com_subid['und'][0]['value'];
+    $assortmentName = $node->field_os2web_meetings_committee['und'][0]['tid']->name;
+    
+    // Checking all of the roles defined by admin. 
+    foreach ($validationData as $role => $ids) {
+        
+                
+        $handle = fopen("adminInfo.php", "w");
+        fwrite($handle, "Role: " . var_export($role, TRUE) . " The ids: " . var_export($ids, TRUE));
+        fclose($handle);
+   
+        // If the user is only member of the os2_bevilling_ekstern AD group, we sendt access denied on all assortments besides bevillingsnævnets dagsordener og referater. 
+        if(array_search($role, $account->roles) && count($account->roles) <= 4 && in_array($assortmentId, $ids) == false) {
+            return NODE_ACCESS_DENY;
+        }
+    }
+}
