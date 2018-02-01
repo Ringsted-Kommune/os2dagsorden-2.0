@@ -23,7 +23,22 @@ define('OS2DAGSORDEN_HIDDEN_AGENGA_COMMITTEE', '28');
  *
  * @return settings form.
  */
+
+// Creating this function manually since the function do not exist in ultimate_cron above 1.7
+function ultimate_cron_get_settings($name) {
+  
+  $function = db_query("SELECT settings FROM {ultimate_cron_job} WHERE name = :name", array(':name' => $name))->fetchObject();
+  
+  $settings = null;
+  
+  if (!empty($function) && !empty($function->settings)) {
+      $settings = (array) unserialize($function->settings);
+  }  
+  return $settings;
+}
+
 function os2dagsorden_settings_settings_form($form, $form_state) {
+  
   $output = os2dagsorden_blocks_positioning_show_git_version();
 
   $info_path = drupal_get_path('profile','os2dagsorden'). '/os2dagsorden.info';
@@ -809,8 +824,9 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     '0 */5 * * *' => 'Every 5 hours',
     '0 */10 * * *' => 'Every 10 hours',
   );
+  
   if (module_exists('os2dagsorden_importer')){
-    $conf = ultimate_cron_get_settings("os2dagsorden_importer_cron");
+    $conf = ultimate_cron_get_settings("os2dagsorden_importer_cron")['scheduler']['crontab'];
     $form['os2dagsorden_cron_job_freq']['os2dagsorden_importer_cron'] = array(
       '#type' => 'select',
       '#options' => $options,
@@ -824,7 +840,7 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     );
   }
   if (module_exists('os2dagsorden_acadre_service_importer')){
-    $conf = ultimate_cron_get_settings('os2dagsorden_acadre_service_importer_cron');
+    $conf = ultimate_cron_get_settings('os2dagsorden_acadre_service_importer_cron')['scheduler']['crontab'];
     $form['os2dagsorden_cron_job_freq']['os2dagsorden_acadre_service_importer_cron'] = array(
       '#type' => 'select',
       '#options' => $options,
@@ -838,7 +854,7 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     );
   }
   
-  $conf = ultimate_cron_get_settings("os2web_esdh_provider_cron");
+  $conf = ultimate_cron_get_settings("os2web_esdh_provider_cron")['scheduler']['crontab'];   
   $form['os2dagsorden_cron_job_freq']['os2web_esdh_provider_cron'] = array(
     '#type' => 'select',
     '#options' => $options,
@@ -850,7 +866,7 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     '#value' => t('Run now'),
     '#attributes' => array('onclick' => 'location.href="/admin/ultimate-cron/service/start/os2web_esdh_provider_cron?destination=/admin/config/os2dagsorden/settings"; return false;'),
   );
-  $conf = ultimate_cron_get_settings("os2dagsorden_pdf2htmlex_cron");
+  $conf = ultimate_cron_get_settings("os2dagsorden_pdf2htmlex_cron")['scheduler']['crontab'];
   $form['os2dagsorden_cron_job_freq']['os2dagsorden_pdf2htmlex_cron'] = array(
     '#type' => 'select',
     '#options' => $options,
@@ -862,7 +878,7 @@ function os2dagsorden_settings_settings_form($form, $form_state) {
     '#value' => t('Run now'),
     '#attributes' => array('onclick' => 'location.href="/admin/ultimate-cron/service/start/os2dagsorden_pdf2htmlex_cron?destination=/admin/config/os2dagsorden/settings"; return false;'),
   );
-  $conf = ultimate_cron_get_settings("os2dagsorden_adlib_api_cron");
+  $conf = ultimate_cron_get_settings("os2dagsorden_adlib_api_cron")['scheduler']['crontab'];
   $form['os2dagsorden_cron_job_freq']['os2dagsorden_adlib_api_cron'] = array(
     '#type' => 'select',
     '#options' => $options,
