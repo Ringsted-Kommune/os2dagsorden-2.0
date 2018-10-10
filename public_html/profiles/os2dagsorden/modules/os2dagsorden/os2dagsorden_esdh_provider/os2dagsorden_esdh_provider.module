@@ -127,12 +127,14 @@ function os2dagsorden_esdh_provider_bullet_add_number($node, $number){
   return $node;
 }
 
+// This is disabled by Michael Skjærlund, since we dont want deletion of speaking papers on republish.
+// This will be changeed to be an option later on, right now we har hotfixing.
 /**
  * Implements hook_node_delete().
  *
  * Deletes the associated speaker papers when deleting bullets
  */
-function os2dagsorden_esdh_provider_node_delete($node){
+/*function os2dagsorden_esdh_provider_node_delete($node){
   if ($node->type === 'os2web_meetings_bullet') {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
@@ -146,7 +148,7 @@ function os2dagsorden_esdh_provider_node_delete($node){
         node_delete($nid);
     }
   }
-}
+}*/
 
 /**
  * Appends word "Tillægsdagsorden" to the bullet title if bullet is of type additional dagsorden
