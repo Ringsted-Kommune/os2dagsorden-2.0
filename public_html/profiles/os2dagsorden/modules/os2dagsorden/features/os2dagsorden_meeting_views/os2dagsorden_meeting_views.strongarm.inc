@@ -143,6 +143,8 @@ function os2dagsorden_meeting_views_strongarm() {
   $strongarm->value = array(
     'link' => 0,
     'corner' => 0,
+    'block' => 'block',
+    'help' => 'help',
   );
   $export['print_html_link_pos'] = $strongarm;
 
@@ -377,7 +379,8 @@ function os2dagsorden_meeting_views_strongarm() {
   $strongarm->value = array(
     'link' => 0,
     'corner' => 0,
-    'block' => 0,
+    'block' => 'block',
+    'help' => 'help',
   );
   $export['print_pdf_link_pos'] = $strongarm;
 
