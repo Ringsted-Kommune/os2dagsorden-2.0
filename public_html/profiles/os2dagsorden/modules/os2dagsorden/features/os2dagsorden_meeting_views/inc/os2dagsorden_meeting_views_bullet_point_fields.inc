@@ -59,59 +59,24 @@ function os2dagsorden_meeting_views_bullet_point_fields_indicator_bullet_point_h
 function os2dagsorden_meeting_views_bullet_point_fields_title_navigation_buttons($bp_id) {
   $q = explode("/", $_GET['q']);
 
-  $previous_bullet_point = NULL;
-  $next_bullet_point = NULL;
-
+  // Extracting the current meetings id from the url
   $meeting_id = $q[1];
-  $all_meetings = os2dagsorden_access_helper_get_meeting_and_tillaegs_meetings($meeting_id);
-  foreach ($all_meetings as $nid) {
-    $meeting = node_load($nid);
 
-    $bullet_point = node_load($bp_id);
+  // Loading the bullet point being view right now
+  $bullet_point = node_load($bp_id);
 
-    if (!empty($meeting->field_os2web_meetings_bullets['und'])) {
-      foreach ($meeting->field_os2web_meetings_bullets['und'] as $new_bp) {
-        if (intval($bp_id) != intval($new_bp['target_id'])) {
-          $new_bullet_point = node_load($new_bp['target_id']);
-          //checking if the ordinal number of new bullet point is BELOW the current bulet point ordinal number
-          //at the same time, checking if user has an access to that bullet point
-          if ($new_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] < $bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] && os2dagsorden_access_helper_check_user_can_see_bullet_point($meeting_id, $new_bp['target_id'])) {
-            //checking if there is no pointer to previous bullet point
-            //or the ordinal number of the new bullet point is higher than the ordinal number of current previous bullet point
-            if (!$previous_bullet_point || $new_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] > $previous_bullet_point->field_bul_point_number['und'][0]['value']) {
-              $previous_bullet_point = $new_bullet_point;
-            }
-          }
-          //checking if the ordinal number of new bullet point is ABOVE the current bulet point ordinal number
-          //at the same time, checking if user has an access to that bullet point
-          else if ($new_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] > $bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] && os2dagsorden_access_helper_check_user_can_see_bullet_point($meeting_id, $new_bp['target_id'])) {
-            //checking if there is no pointer to next bullet point
-            //or the ordinal number of the new bullet point is higher than the ordinal number of current next bullet point
-            if (!$next_bullet_point || $new_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] < $next_bullet_point->field_bul_point_number['und'][0]['value']) {
-              $next_bullet_point = $new_bullet_point;
-            }
-          }
+  // Get all bullet points
+  $bulletPoints = find_all_bullets($meeting_id);
 
-          //check if everything is set already, then break the loop
-          if ($previous_bullet_point && $next_bullet_point &&
-            $previous_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] + 1 ==
-            $bullet_point->field_os2web_meetings_bul_number['und'][0]['value']
-            &&
-            $next_bullet_point->field_os2web_meetings_bul_number['und'][0]['value'] - 1 ==
-            $bullet_point->field_os2web_meetings_bul_number['und'][0]['value']
-          )
-            break;
-        }
-      }
-    }
-  }
+  // Now lets find out wich bullet point that should be pointed to on prev and next arrow
+  $prevNext = check_bullet_points($bulletPoints, $bp_id);
 
   global $base_url;
 
-  if ($previous_bullet_point)
-    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $previous_bullet_point->nid . '" class="form-submit nav-button left"><</a>';
-  if ($next_bullet_point)
-    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $next_bullet_point->nid . '" class="form-submit nav-button right">></a>';
+  if ($prevNext['prev'])
+    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $prevNext['prev'] . '" class="form-submit nav-button left"><</a>';
+  if ($prevNext['next'])
+    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $prevNext['next'] . '" class="form-submit nav-button right">></a>';
 
   if ($bullet_point->field_os2web_meetings_bul_closed['und'][0][value] == 1)
     print '<div class="indicator-unlocked"></div>';
@@ -132,17 +97,40 @@ function os2dagsorden_meeting_views_bullet_point_fields_title_navigation_buttons
 function os2dagsorden_meeting_views_bullet_point_fields_bottom_navigation_buttons($bp_id) {
   $q = explode("/", $_GET['q']);
 
-  $previous_bullet_point = NULL;
-  $next_bullet_point = NULL;
+  // Extracting the current meetings id from the url
+  $meeting_id = $q[1];
+
+  // Loading the bullet point being view right now
+  $bullet_point = node_load($bp_id);
+
+  // Get all bullet points
+  $bulletPoints = find_all_bullets($meeting_id);
+
+  // Now lets find out wich bullet point that should be pointed to on prev and next arrow
+  $prevNext = check_bullet_points($bulletPoints, $bp_id);
+
+  global $base_url;
+
+  // Creating wrapping element
+  print '<div id="bottom-bullet-navigation-buttons">';
+
+  if ($prevNext['prev'])
+    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $prevNext['prev'] . '" class="form-submit nav-button left">Forrige punkt</a>';
+  if ($prevNext['next'])
+    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $prevNext['next'] . '" class="form-submit nav-button right">Næste punkt</a>';
+
+  // Creating wrapping element
+  print '</div>';
+}
+
+// Finding all bullets based on the "meetings" could be a single meeting and/or "addendum to" and a ordinary meeting togheter.
+function find_all_bullets($meeting_id) {
 
   $bulletPoints = array();
-
-  $meeting_id = $q[1];
+  
   $all_meetings = os2dagsorden_access_helper_get_meeting_and_tillaegs_meetings($meeting_id);
   foreach ($all_meetings as $nid) {
     $meeting = node_load($nid);
-
-    $bullet_point = node_load($bp_id);
 
     foreach($meeting->field_os2web_meetings_bullets['und'] as $bullet) {
 
@@ -154,34 +142,20 @@ function os2dagsorden_meeting_views_bullet_point_fields_bottom_navigation_button
       }
     }    
   }
-
-  // Now lets find out wich bullet point that should be pointed to on prev and next arrow
-  $prevNext = check_bullet_points($bulletPoints, $bp_id);
-
-  $previous_bullet_point = $prevNext['prev'];
-  $next_bullet_point = $prevNext['next'];
-
-  global $base_url;
-
-  // Creating wrapping element
-  print '<div id="bottom-bullet-navigation-buttons">';
-
-  if ($previous_bullet_point)
-    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $previous_bullet_point . '" class="form-submit nav-button left">Forrige punkt</a>';
-  if ($next_bullet_point)
-    print '<a href="' . $base_url . '/meeting/' . $meeting_id . '/bullet-point/' . $next_bullet_point . '" class="form-submit nav-button right">Næste punkt</a>';
-
-  // Creating wrapping element
-  print '</div>';
+  return $bulletPoints;
 }
 
+// Based on all bullet points, lets find the next and prev bullet point, based on all of the bullets that the user is allowed to see on this specific meeting.
 function check_bullet_points($bulletPoints, $bp_id) {
 
+  // gonna hold both values
   $prevNext = array();
 
+  // Finding the index of the currently watch bullet point.
   $bulletPointArrayPlacement = array_search($bp_id, $bulletPoints);
 
-  if($bulletPointArrayPlacement != -1) {
+  // Based on the currently watched bullet point, find the bullet right before and right after.
+  if($bulletPointArrayPlacement != 0) {
     $prevNext['prev'] = $bulletPoints[$bulletPointArrayPlacement -1];
   }
   
