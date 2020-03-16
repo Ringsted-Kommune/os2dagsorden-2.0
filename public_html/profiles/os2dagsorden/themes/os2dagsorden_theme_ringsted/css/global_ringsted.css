@@ -445,3 +445,17 @@ tr.bulletpoint-row{
 	position:relative;
 	display:block;
 }
+
+
+/* Custom */
+th.views-field-field-os2web-meetings-type {
+  width: 100px;
+}
+
+th.views-field-php-2 {
+  width: 500px;
+}
+
+th.views-field-field-os2web-meetings-date {
+  width: 160px;
+}
